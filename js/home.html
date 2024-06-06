@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Chat App</title>
+    <style>
+        div{
+            margin: auto;
+            width: 15%;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <label for="name">Enter Name:</label><br>
+        <input type="text" class="login" required="true">
+        <button class="loginbtn">Login</button>  
+        <button class="next" style="display: none;"><a href="./index.html">next</a></button>
+    </div>
+    <script>
+        let login = document.querySelector(".login");
+        let btn = document.querySelector(".loginbtn");
+        
+        btn.addEventListener("click", () => {
+            let name = login.value;
+            console.log(name)
+            if(name === null || name === "") {
+                alert("Please enter valid name.");
+            } else {
+                sessionStorage.setItem("name", name);
+                document.querySelector(".next a").click();
+            }
+        });
+    </script>
+</body>
+</html>

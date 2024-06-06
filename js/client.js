@@ -1,4 +1,4 @@
-const socket = io("http://localhost:8000")
+const socket = io("https://swh6fcwp-8000.inc1.devtunnels.ms/")
 
 const form = document.getElementById('container')
 const msgInp = document.querySelector('.chat')

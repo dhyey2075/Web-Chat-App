@@ -1,36 +1,205 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat App</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="container">
-      <div class="chat-box">
-        <div class="chat-header">
-          <h2>Chat App</h2>
-        </div>
-        <div class="chat-messages">
-          <div class="message-body left">Hi there!</div>
 
-          <div class="message-body right">Hello! How can I help you?</div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
 
-          <!-- More messages go here -->
-        </div>
-        <div class="chat-input">
-          <input
-            class="chat"
-            type="text"
-            placeholder="Type your message here..."
-          />
-          <button class="btn send">Send</button>
-          <button class="btn clear">Clear</button>
-        </div>
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chat-box {
+      border: 1px solid #ccc;
+      width: 400px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .chat-header {
+      background-color: #007bff;
+      color: white;
+      padding: 10px;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+    }
+
+    .chat-header h2 {
+      margin: 0;
+    }
+
+    .chat-messages {
+      padding: 10px;
+      height: 600px;
+      overflow-y: scroll;
+    }
+
+    .message {
+      margin-bottom: 10px;
+    }
+
+    .sender {
+      font-weight: bold;
+    }
+
+    .chat-input {
+      display: flex;
+      padding: 10px;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+
+    .chat-input button {
+      padding: 8px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .chat-input button:hover {
+      background-color: #0056b3;
+    }
+
+    .right {
+      margin-top: 5px;
+      float: right;
+      clear: both;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin: 5px;
+    }
+
+    .left {
+      margin-top: 5px;
+      float: left;
+      clear: both;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin: 5px;
+    }
+
+    .message-body {
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin: 5px;
+    }
+
+    .send {
+      margin: 0 3px;
+      background-color: green;
+    }
+
+    .clear {
+      margin: 0 3px;
+      background-color: red;
+    }
+
+    ::-webkit-scrollbar {
+      width: 0px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="chat-box">
+      <div class="chat-header">
+        <h2>Chat App</h2>
+      </div>
+      <div class="chat-messages"></div>
+      <div class="chat-input">
+        <input class="chat" type="text" placeholder="Type your message here..." />
+        <button class="btn send">Send</button>
+        <button class="btn clear">Clear</button>
       </div>
     </div>
-    <script defer src="http://localhost:8000/socket.io/socket.io.js"></script>
-    <script defer src="client.js"></script>
-  </body>
+  </div>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script>
+    const socket = io("https://swh6fcwp-8000.inc1.devtunnels.ms/");
+
+    const msgInp = document.querySelector('.chat');
+    const msgContainer = document.querySelector('.chat-messages');
+    const sendBtn = document.querySelector('.btn.send');
+    const clearBtn = document.querySelector('.btn.clear');
+    const users = [];
+    const play = new Audio('./tone.mp3');
+
+    window.setInterval(function () {
+      var elem = document.querySelector('.chat-messages');
+      elem.scrollTop = elem.scrollHeight;
+    }, 1000);
+
+    document.querySelector(".clear").addEventListener('click', (e) => {
+      e.preventDefault();
+      msgContainer.innerHTML = '';
+    });
+
+    document.querySelector(".chat").addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        sendBtn.click();
+      }
+    });
+
+    const append = (message, position) => {
+      const messageElement = document.createElement('div');
+      messageElement.innerText = message;
+      messageElement.classList.add('message');
+      messageElement.classList.add(position);
+      msgContainer.append(messageElement);
+    };
+
+      let name = sessionStorage.getItem("name")
+      users.push(name)
+
+    socket.emit('new-user-joined', name);
+    users.push(name)
+
+    sendBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const message = msgInp.value;
+      append(`You: ${message}`, 'right');
+      socket.emit('send', message);
+      msgInp.value = '';
+      console.log(users)
+    });
+
+    socket.on('user-joined', name => {
+      append(`${name} joined the chat`, 'left');
+      users.push(name)
+    });
+
+    socket.on('receive', data => {
+      play.play();
+      append(`${data.name}: ${data.message}`, 'left');
+    });
+
+    socket.on('send', data => {
+      append(`${name}: ${data.message}`, 'right');
+    });
+  </script>
+</body>
+
 </html>

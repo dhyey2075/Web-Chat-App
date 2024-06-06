@@ -4,6 +4,7 @@ body {
     padding: 0;
 }
 
+
 .container {
     display: flex;
     justify-content: center;
@@ -104,4 +105,9 @@ body {
 }
 ::-webkit-scrollbar {
     width: 0px;
+}
+
+*{
+    background-color: black;
+    color: white;
 }
